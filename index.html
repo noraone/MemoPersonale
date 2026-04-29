@@ -181,6 +181,7 @@
             justify-content: center;
             transition: transform 0.2s ease;
             z-index: 20;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .add-btn:active { transform: scale(0.9); }
@@ -195,6 +196,115 @@
         }
 
         .bottom-bar .active { color: #1a1a1a; font-weight: 700; }
+
+        /* Modal */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-bg.open { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .modal label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            margin-top: 10px;
+        }
+
+        .modal input, .modal select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            background: #f8f8f8;
+        }
+
+        .modal input:focus, .modal select:focus {
+            border-color: #1a1a1a;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            flex: 2;
+            padding: 14px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 14px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .apple-reminder-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            font-family: inherit;
+            text-align: center;
+        }
+
+        .apple-reminder-btn:active {
+            background: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -216,51 +326,12 @@
             <button class="cat pagamenti">💳 Pagamenti</button>
         </div>
 
-        <div class="content">
+        <div class="content" id="content">
             <p class="section-title">Oggi</p>
-
-            <div class="card" style="border-left-color: #1565c0;">
-                <div class="card-left">
-                    <span class="card-title">Riunione con cliente</span>
-                    <span class="card-time">⏰ 10:30 - 11:30</span>
-                    <span class="card-cat" style="color:#1565c0;">💼 Lavoro</span>
-                    <span class="badge l2">⚠️ Livello 2: Telegram inviato</span>
-                </div>
-                <div class="check done"></div>
-            </div>
-
-            <div class="card" style="border-left-color: #c62828;">
-                <div class="card-left">
-                    <span class="card-title">Dentista</span>
-                    <span class="card-time">⏰ 15:00 - 16:00</span>
-                    <span class="card-cat" style="color:#c62828;">📅 Appuntamenti</span>
-                    <span class="badge l1">🔔 Notifica inviata</span>
-                </div>
-                <div class="check"></div>
-            </div>
-
-            <p class="section-subtitle">Domani</p>
-
-            <div class="card" style="border-left-color: #2e7d32;">
-                <div class="card-left">
-                    <span class="card-title">Pagare bolletta luce</span>
-                    <span class="card-time">⏰ Scadenza: domani</span>
-                    <span class="card-cat" style="color:#2e7d32;">💳 Pagamenti</span>
-                </div>
-                <div class="check"></div>
-            </div>
-
-            <div class="card" style="border-left-color: #e65100;">
-                <div class="card-left">
-                    <span class="card-title">Spesa settimanale</span>
-                    <span class="card-time">⏰ Pomeriggio</span>
-                    <span class="card-cat" style="color:#e65100;">✅ Cose da fare</span>
-                </div>
-                <div class="check"></div>
-            </div>
+            <div id="reminders-list"></div>
         </div>
 
-        <button class="add-btn">+</button>
+        <button class="add-btn" onclick="openModal()">+</button>
 
         <div class="bottom-bar">
             <span class="active">📋 Oggi</span>
@@ -268,6 +339,244 @@
             <span>⚙️ Impostazioni</span>
         </div>
     </div>
+
+    <!-- Modal aggiungi promemoria -->
+    <div class="modal-bg" id="modalBg" onclick="closeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Nuovo promemoria</h3>
+            
+            <label>Titolo</label>
+            <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
+            
+            <label>Categoria</label>
+            <select id="catInput">
+                <option value="lavoro">💼 Lavoro</option>
+                <option value="appuntamenti">📅 Appuntamenti</option>
+                <option value="cose">✅ Cose da fare</option>
+                <option value="pagamenti">💳 Pagamenti</option>
+            </select>
+            
+            <label>Data e ora</label>
+            <input type="datetime-local" id="dateInput">
+            
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="addReminder()">✅ Salva</button>
+                <button class="btn-secondary" onclick="closeModal()">Chiudi</button>
+            </div>
+            
+            <button class="apple-reminder-btn" onclick="addToAppleReminders()">
+                🍎 Aggiungi anche ai Promemoria Apple
+            </button>
+        </div>
+    </div>
+
+<script>
+let reminders = JSON.parse(localStorage.getItem('memoReminders') || '[]');
+
+function saveReminders() {
+    localStorage.setItem('memoReminders', JSON.stringify(reminders));
+}
+
+function openModal() {
+    document.getElementById('modalBg').classList.add('open');
+    // Imposta data di default a domani mattina
+    const now = new Date();
+    now.setDate(now.getDate() + 1);
+    now.setHours(9, 0, 0, 0);
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('dateInput').value = localDateTime;
+    document.getElementById('titleInput').value = '';
+    document.getElementById('titleInput').focus();
+}
+
+function closeModal() {
+    document.getElementById('modalBg').classList.remove('open');
+}
+
+function addReminder() {
+    const title = document.getElementById('titleInput').value.trim();
+    const category = document.getElementById('catInput').value;
+    const dateTime = document.getElementById('dateInput').value;
+    
+    if (!title) { alert('Inserisci un titolo'); return; }
+    if (!dateTime) { alert('Inserisci data e ora'); return; }
+    
+    const reminder = {
+        id: Date.now(),
+        title: title,
+        category: category,
+        dateTime: dateTime,
+        done: false,
+        escalation: 0
+    };
+    
+    reminders.unshift(reminder);
+    saveReminders();
+    renderReminders();
+    closeModal();
+    
+    // Chiedi se aggiungere ai Promemoria Apple
+    if (confirm('Vuoi aggiungerlo anche ai Promemoria Apple per ricevere la notifica?')) {
+        addToAppleRemindersFromData(title, dateTime);
+    }
+}
+
+function addToAppleReminders() {
+    const title = document.getElementById('titleInput').value.trim();
+    const dateTime = document.getElementById('dateInput').value;
+    if (!title || !dateTime) { alert('Compila titolo e data prima'); return; }
+    addToAppleRemindersFromData(title, dateTime);
+}
+
+function addToAppleRemindersFromData(title, dateTime) {
+    // Formatta per il link x-apple-reminder
+    const encodedTitle = encodeURIComponent(title);
+    const url = `x-apple-reminderkit://reminder?title=${encodedTitle}&dueDate=${dateTime}:00`;
+    
+    // Prova ad aprire l'app Promemoria
+    window.location.href = url;
+    
+    // Fallback: mostra istruzioni se l'app non si apre
+    setTimeout(() => {
+        alert('🍎 Apri manualmente Promemoria Apple e aggiungi:\n\n📝 ' + title + '\n📅 ' + new Date(dateTime).toLocaleString('it-IT'));
+    }, 1000);
+}
+
+function toggleDone(id) {
+    const r = reminders.find(r => r.id === id);
+    if (r) {
+        r.done = !r.done;
+        saveReminders();
+        renderReminders();
+    }
+}
+
+function deleteReminder(id) {
+    if (confirm('Eliminare questo promemoria?')) {
+        reminders = reminders.filter(r => r.id !== id);
+        saveReminders();
+        renderReminders();
+    }
+}
+
+function getCategoryName(cat) {
+    const map = {
+        'lavoro': '💼 Lavoro',
+        'appuntamenti': '📅 Appuntamenti',
+        'cose': '✅ Cose da fare',
+        'pagamenti': '💳 Pagamenti'
+    };
+    return map[cat] || cat;
+}
+
+function getCategoryColor(cat) {
+    const map = {
+        'lavoro': '#1565c0',
+        'appuntamenti': '#c62828',
+        'cose': '#e65100',
+        'pagamenti': '#2e7d32'
+    };
+    return map[cat] || '#ccc';
+}
+
+function formatDate(dateTime) {
+    const d = new Date(dateTime);
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const date = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+    
+    // Oggi, domani o data
+    if (d.toDateString() === now.toDateString()) return `⏰ Oggi alle ${time}`;
+    if (d.toDateString() === tomorrow.toDateString()) return `⏰ Domani alle ${time}`;
+    return `⏰ ${date} alle ${time}`;
+}
+
+function renderReminders() {
+    const list = document.getElementById('reminders-list');
+    
+    if (reminders.length === 0) {
+        list.innerHTML = `
+            <div style="text-align:center;padding:40px 0;color:#aaa;">
+                <div style="font-size:50px;margin-bottom:12px;">📝</div>
+                <div style="font-size:16px;">Nessun promemoria</div>
+                <div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div>
+            </div>`;
+        return;
+    }
+    
+    // Separa per oggi, domani, dopo
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0,0,0,0);
+    
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23,59,59,999);
+    
+    const active = reminders.filter(r => !r.done).sort((a,b) => new Date(a.dateTime) - new Date(b.dateTime));
+    const done = reminders.filter(r => r.done);
+    
+    let html = '';
+    
+    if (active.length > 0) {
+        html += '<p class="section-title">📋 Da fare</p>';
+        active.forEach(r => {
+            html += `
+                <div class="card" style="border-left-color: ${getCategoryColor(r.category)};">
+                    <div class="card-left">
+                        <span class="card-title">${r.title}</span>
+                        <span class="card-time">${formatDate(r.dateTime)}</span>
+                        <span class="card-cat" style="color:${getCategoryColor(r.category)};">${getCategoryName(r.category)}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+                        <div class="check" onclick="toggleDone(${r.id})"></div>
+                        <span style="font-size:10px;color:#ccc;cursor:pointer;" onclick="deleteReminder(${r.id})">🗑</span>
+                    </div>
+                </div>`;
+        });
+    }
+    
+    if (done.length > 0) {
+        html += '<p class="section-subtitle">✅ Completati</p>';
+        done.forEach(r => {
+            html += `
+                <div class="card" style="border-left-color: ${getCategoryColor(r.category)}; opacity: 0.6;">
+                    <div class="card-left">
+                        <span class="card-title" style="text-decoration: line-through;">${r.title}</span>
+                        <span class="card-time">${formatDate(r.dateTime)}</span>
+                    </div>
+                    <div class="check done" onclick="toggleDone(${r.id})"></div>
+                </div>`;
+        });
+    }
+    
+    list.innerHTML = html;
+}
+
+// Controlla promemoria ogni minuto
+setInterval(() => {
+    const now = new Date();
+    reminders.forEach(r => {
+        if (!r.done && r.escalation === 0) {
+            const d = new Date(r.dateTime);
+            if (Math.abs(now - d) < 60000) { // entro 1 minuto
+                // Suona e vibra
+                try { navigator.vibrate([200,100,200,100,200]); } catch(e) {}
+                alert('🔔 ' + r.title + '\n\n' + formatDate(r.dateTime));
+                r.escalation = 1;
+                saveReminders();
+            }
+        }
+    });
+    renderReminders();
+}, 60000);
+
+// Prima esecuzione
+renderReminders();
+</script>
 
 </body>
 </html>

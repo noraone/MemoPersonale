@@ -13,12 +13,8 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            animation: fadeIn 0.4s ease;
+            background: #000; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; animation: fadeIn 0.4s ease;
         }
         @keyframes fadeIn { from { background: #000; } to { background: #f5f5f7; } }
         .app {
@@ -103,15 +99,9 @@
             border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-family: inherit;
         }
         .btn-delete {
-            flex: 1; padding: 14px; background: #fce4ec; color: #c62828;
+            padding: 14px 20px; background: #fce4ec; color: #c62828;
             border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-family: inherit;
         }
-        .apple-reminder-btn {
-            display: block; width: 100%; padding: 10px; margin-top: 8px;
-            background: #f0f0f0; border: none; border-radius: 8px; font-size: 13px;
-            color: #555; cursor: pointer; font-family: inherit; text-align: center;
-        }
-        .apple-reminder-btn:active { background: #e0e0e0; }
     </style>
 </head>
 <body>
@@ -147,15 +137,12 @@
     </div>
 </div>
 
-<!-- Modal aggiungi / modifica -->
 <div class="modal-bg" id="modalBg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3 id="modalTitle">Nuovo promemoria</h3>
         <input type="hidden" id="editId">
-        
         <label>Titolo</label>
         <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
-        
         <label>Categoria</label>
         <select id="catInput">
             <option value="lavoro">💼 Lavoro</option>
@@ -163,19 +150,13 @@
             <option value="cose">✅ Cose da fare</option>
             <option value="pagamenti">💳 Pagamenti</option>
         </select>
-        
         <label>Data e ora</label>
         <input type="datetime-local" id="dateInput">
-        
         <div class="modal-buttons">
             <button class="btn-primary" id="saveBtn" onclick="saveReminder()">✅ Salva</button>
             <button class="btn-secondary" onclick="closeModal()">Chiudi</button>
-            <button class="btn-delete" id="deleteBtn" onclick="deleteReminderFromModal()" style="display:none;">🗑 Elimina</button>
+            <button class="btn-delete" id="deleteBtn" onclick="deleteReminderFromModal()" style="display:none;">🗑</button>
         </div>
-        
-        <button class="apple-reminder-btn" onclick="addToAppleReminders()">
-            🍎 Aggiungi anche ai Promemoria Apple
-        </button>
     </div>
 </div>
 
@@ -187,18 +168,12 @@ function saveReminders() {
 }
 
 function getCategoryName(cat) {
-    const map = {
-        'lavoro': '💼 Lavoro', 'appuntamenti': '📅 Appuntamenti',
-        'cose': '✅ Cose da fare', 'pagamenti': '💳 Pagamenti'
-    };
+    const map = { 'lavoro': '💼 Lavoro', 'appuntamenti': '📅 Appuntamenti', 'cose': '✅ Cose da fare', 'pagamenti': '💳 Pagamenti' };
     return map[cat] || cat;
 }
 
 function getCategoryColor(cat) {
-    const map = {
-        'lavoro': '#1565c0', 'appuntamenti': '#c62828',
-        'cose': '#e65100', 'pagamenti': '#2e7d32'
-    };
+    const map = { 'lavoro': '#1565c0', 'appuntamenti': '#c62828', 'cose': '#e65100', 'pagamenti': '#2e7d32' };
     return map[cat] || '#ccc';
 }
 
@@ -216,9 +191,7 @@ function formatDate(dateTime) {
 
 function openModal(reminder) {
     document.getElementById('modalBg').classList.add('open');
-    
     if (reminder) {
-        // Modifica
         document.getElementById('modalTitle').textContent = 'Modifica promemoria';
         document.getElementById('editId').value = reminder.id;
         document.getElementById('titleInput').value = reminder.title;
@@ -227,7 +200,6 @@ function openModal(reminder) {
         document.getElementById('saveBtn').textContent = '💾 Salva modifiche';
         document.getElementById('deleteBtn').style.display = 'block';
     } else {
-        // Nuovo
         document.getElementById('modalTitle').textContent = 'Nuovo promemoria';
         document.getElementById('editId').value = '';
         document.getElementById('titleInput').value = '';
@@ -256,27 +228,32 @@ function saveReminder() {
     if (!dateTime) { alert('Inserisci data e ora'); return; }
     
     if (editId) {
-        // Modifica esistente
         const r = reminders.find(r => r.id == editId);
-        if (r) {
-            r.title = title;
-            r.category = category;
-            r.dateTime = dateTime;
-        }
+        if (r) { r.title = title; r.category = category; r.dateTime = dateTime; }
     } else {
-        // Nuovo
-        reminders.unshift({
-            id: Date.now(),
-            title: title,
-            category: category,
-            dateTime: dateTime,
-            done: false
-        });
+        reminders.unshift({ id: Date.now(), title: title, category: category, dateTime: dateTime, done: false });
     }
     
     saveReminders();
     renderReminders();
     closeModal();
+    
+    // Apre Promemoria Apple solo per nuovi memo, compatibile con Chrome e Safari
+    if (!editId) {
+        const d = new Date(dateTime);
+        const iso = d.toISOString().replace(/\.\d{3}/, '');
+        const url = 'x-apple-reminderkit://reminder?title=' + encodeURIComponent(title) + '&dueDate=' + iso;
+        
+        // Usa un iframe nascosto per provare ad aprire l'app
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        setTimeout(() => document.body.removeChild(iframe), 2000);
+        
+        // Fallback: prova anche con window.location
+        setTimeout(() => { window.location.href = url; }, 500);
+    }
 }
 
 function deleteReminderFromModal() {
@@ -287,14 +264,6 @@ function deleteReminderFromModal() {
         renderReminders();
         closeModal();
     }
-}
-
-function addToAppleReminders() {
-    const title = document.getElementById('titleInput').value.trim();
-    const dateTime = document.getElementById('dateInput').value;
-    if (!title || !dateTime) { alert('Compila titolo e data prima'); return; }
-    const url = `x-apple-reminderkit://reminder?title=${encodeURIComponent(title)}&dueDate=${dateTime}:00`;
-    window.location.href = url;
 }
 
 function toggleDone(id) {
@@ -310,10 +279,7 @@ function editReminder(id) {
 function renderReminders() {
     const list = document.getElementById('reminders-list');
     if (reminders.length === 0) {
-        list.innerHTML = `<div style="text-align:center;padding:40px 0;color:#aaa;">
-            <div style="font-size:50px;margin-bottom:12px;">📝</div>
-            <div style="font-size:16px;">Nessun promemoria</div>
-            <div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div>`;
+        list.innerHTML = '<div style="text-align:center;padding:40px 0;color:#aaa;"><div style="font-size:50px;margin-bottom:12px;">📝</div><div style="font-size:16px;">Nessun promemoria</div><div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div>';
         return;
     }
     const active = reminders.filter(r => !r.done).sort((a,b) => new Date(a.dateTime) - new Date(b.dateTime));
@@ -322,31 +288,13 @@ function renderReminders() {
     if (active.length > 0) {
         html += '<p class="section-title">📋 Da fare</p>';
         active.forEach(r => {
-            html += `
-            <div class="card" style="border-left-color:${getCategoryColor(r.category)};">
-                <div class="card-left" onclick="editReminder(${r.id})">
-                    <span class="card-title">${r.title}</span>
-                    <span class="card-time">${formatDate(r.dateTime)}</span>
-                    <span class="card-cat" style="color:${getCategoryColor(r.category)};">${getCategoryName(r.category)}</span>
-                </div>
-                <div class="card-actions">
-                    <div class="check" onclick="event.stopPropagation();toggleDone(${r.id})"></div>
-                    <span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(${r.id})">✏️</span>
-                </div>
-            </div>`;
+            html += '<div class="card" style="border-left-color:' + getCategoryColor(r.category) + ';"><div class="card-left" onclick="editReminder(' + r.id + ')"><span class="card-title">' + r.title + '</span><span class="card-time">' + formatDate(r.dateTime) + '</span><span class="card-cat" style="color:' + getCategoryColor(r.category) + ';">' + getCategoryName(r.category) + '</span></div><div class="card-actions"><div class="check" onclick="event.stopPropagation();toggleDone(' + r.id + ')"></div><span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(' + r.id + ')">✏️</span></div></div>';
         });
     }
     if (done.length > 0) {
         html += '<p class="section-subtitle">✅ Completati</p>';
         done.forEach(r => {
-            html += `
-            <div class="card" style="border-left-color:${getCategoryColor(r.category)};opacity:0.6;">
-                <div class="card-left" onclick="editReminder(${r.id})">
-                    <span class="card-title" style="text-decoration:line-through;">${r.title}</span>
-                    <span class="card-time">${formatDate(r.dateTime)}</span>
-                </div>
-                <div class="check done" onclick="toggleDone(${r.id})"></div>
-            </div>`;
+            html += '<div class="card" style="border-left-color:' + getCategoryColor(r.category) + ';opacity:0.6;"><div class="card-left" onclick="editReminder(' + r.id + ')"><span class="card-title" style="text-decoration:line-through;">' + r.title + '</span><span class="card-time">' + formatDate(r.dateTime) + '</span></div><div class="check done" onclick="toggleDone(' + r.id + ')"></div></div>';
         });
     }
     list.innerHTML = html;

@@ -11,7 +11,6 @@
     <title>MemoPersonale</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #000;
@@ -21,354 +20,164 @@
             min-height: 100vh;
             animation: fadeIn 0.4s ease;
         }
-
-        @keyframes fadeIn {
-            from { background: #000; }
-            to { background: #f5f5f7; }
-        }
-
+        @keyframes fadeIn { from { background: #000; } to { background: #f5f5f7; } }
         .app {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            animation: showApp 0.3s 0.2s forwards;
+            width: 100%; max-width: 420px; height: 100vh; background: white;
+            display: flex; flex-direction: column;
+            opacity: 0; animation: showApp 0.3s 0.2s forwards;
         }
-
-        @keyframes showApp {
-            to { opacity: 1; }
-        }
-
+        @keyframes showApp { to { opacity: 1; } }
         .header {
-            padding: 16px 24px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px 24px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .header h1 {
-            font-size: 30px;
-            font-weight: 800;
-            color: #1a1a1a;
-            letter-spacing: -0.5px;
-        }
-
-        .header .subtitle {
-            font-size: 13px;
-            color: #888;
-            margin-top: 2px;
-        }
-
-        .categories {
-            display: flex;
-            gap: 8px;
-            padding: 12px 24px;
-            overflow-x: auto;
-        }
-
+        .header h1 { font-size: 30px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; }
+        .header .subtitle { font-size: 13px; color: #888; margin-top: 2px; }
+        .categories { display: flex; gap: 8px; padding: 12px 24px; overflow-x: auto; }
         .cat {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            border: none;
-            cursor: pointer;
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            white-space: nowrap; border: none; cursor: pointer;
         }
-
         .cat.all { background: #1a1a1a; color: white; }
         .cat.lavoro { background: #e3f2fd; color: #1565c0; }
         .cat.appuntamenti { background: #fce4ec; color: #c62828; }
         .cat.cose { background: #fff3e0; color: #e65100; }
         .cat.pagamenti { background: #e8f5e9; color: #2e7d32; }
-
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 24px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 16px 0 10px;
-            color: #1a1a1a;
-        }
-
-        .section-subtitle {
-            font-size: 13px;
-            color: #999;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
+        .content { flex: 1; overflow-y: auto; padding: 8px 24px; }
+        .section-title { font-size: 20px; font-weight: 700; margin: 16px 0 10px; color: #1a1a1a; }
+        .section-subtitle { font-size: 13px; color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
         .card {
-            background: #fafafa;
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 8px;
-            border-left: 4px solid #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #fafafa; border-radius: 14px; padding: 14px 16px;
+            margin-bottom: 8px; border-left: 4px solid #ccc;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .card-left { display: flex; flex-direction: column; gap: 3px; }
-
+        .card-left { display: flex; flex-direction: column; gap: 3px; cursor: pointer; flex: 1; }
         .card-title { font-weight: 600; font-size: 15px; color: #1a1a1a; }
-
         .card-time { font-size: 13px; color: #888; }
-
         .card-cat { font-size: 11px; font-weight: 600; }
-
-        .badge {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 3px;
-        }
-
-        .badge.l1 { background: #e3f2fd; color: #1565c0; }
-        .badge.l2 { background: #fff3e0; color: #e65100; }
-        .badge.l3 { background: #fce4ec; color: #c62828; }
-
+        .card-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; }
         .check {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-
-        .check.done {
-            background: #4caf50;
-            border-color: #4caf50;
-        }
-
-        .check.done::after {
-            content: "✓";
-            color: white;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
+        .check.done { background: #4caf50; border-color: #4caf50; }
+        .check.done::after { content: "✓"; color: white; font-weight: bold; font-size: 13px; }
         .add-btn {
-            position: fixed;
-            bottom: 28px;
-            right: 24px;
-            width: 54px;
-            height: 54px;
-            background: #1a1a1a;
-            border-radius: 50%;
-            color: white;
-            font-size: 28px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s ease;
-            z-index: 20;
-            -webkit-tap-highlight-color: transparent;
+            position: fixed; bottom: 28px; right: 24px; width: 54px; height: 54px;
+            background: #1a1a1a; border-radius: 50%; color: white; font-size: 28px;
+            border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease; z-index: 20;
         }
-
         .add-btn:active { transform: scale(0.9); }
-
         .bottom-bar {
-            border-top: 1px solid #eee;
-            padding: 12px 24px 24px;
-            display: flex;
-            justify-content: space-around;
-            font-size: 12px;
-            color: #888;
+            border-top: 1px solid #eee; padding: 12px 24px 24px;
+            display: flex; justify-content: space-around; font-size: 12px; color: #888;
         }
-
         .bottom-bar .active { color: #1a1a1a; font-weight: 700; }
-
-        /* Modal */
         .modal-bg {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 100;
-            align-items: flex-end;
-            justify-content: center;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 100; align-items: flex-end; justify-content: center;
         }
-
         .modal-bg.open { display: flex; }
-
         .modal {
-            background: white;
-            border-radius: 20px 20px 0 0;
-            padding: 24px;
-            width: 100%;
-            max-width: 420px;
-            animation: slideUp 0.3s ease;
+            background: white; border-radius: 20px 20px 0 0; padding: 24px;
+            width: 100%; max-width: 420px; animation: slideUp 0.3s ease;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal h3 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .modal label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-            margin-top: 10px;
-        }
-
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+        .modal label { display: block; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; margin-top: 10px; }
         .modal input, .modal select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            background: #f8f8f8;
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;
+            font-size: 16px; font-family: inherit; outline: none; background: #f8f8f8;
         }
-
-        .modal input:focus, .modal select:focus {
-            border-color: #1a1a1a;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
+        .modal input:focus, .modal select:focus { border-color: #1a1a1a; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .btn-primary {
-            flex: 2;
-            padding: 14px;
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
+            flex: 2; padding: 14px; background: #1a1a1a; color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
         }
-
         .btn-secondary {
-            flex: 1;
-            padding: 14px;
-            background: #f0f0f0;
-            color: #666;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            font-family: inherit;
+            flex: 1; padding: 14px; background: #f0f0f0; color: #666;
+            border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-family: inherit;
         }
-
+        .btn-delete {
+            flex: 1; padding: 14px; background: #fce4ec; color: #c62828;
+            border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-family: inherit;
+        }
         .apple-reminder-btn {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #555;
-            cursor: pointer;
-            font-family: inherit;
-            text-align: center;
+            display: block; width: 100%; padding: 10px; margin-top: 8px;
+            background: #f0f0f0; border: none; border-radius: 8px; font-size: 13px;
+            color: #555; cursor: pointer; font-family: inherit; text-align: center;
         }
-
-        .apple-reminder-btn:active {
-            background: #e0e0e0;
-        }
+        .apple-reminder-btn:active { background: #e0e0e0; }
     </style>
 </head>
 <body>
 
-    <div class="app">
-        <div class="header">
-            <div>
-                <h1>MemoPersonale</h1>
-                <p class="subtitle">La tua app su misura</p>
-            </div>
-            <span style="font-size:13px;color:#888;">📶 🔋</span>
+<div class="app">
+    <div class="header">
+        <div>
+            <h1>MemoPersonale</h1>
+            <p class="subtitle">La tua app su misura</p>
         </div>
-
-        <div class="categories">
-            <button class="cat all">Tutti</button>
-            <button class="cat lavoro">💼 Lavoro</button>
-            <button class="cat appuntamenti">📅 Appuntamenti</button>
-            <button class="cat cose">✅ Cose da fare</button>
-            <button class="cat pagamenti">💳 Pagamenti</button>
-        </div>
-
-        <div class="content" id="content">
-            <p class="section-title">Oggi</p>
-            <div id="reminders-list"></div>
-        </div>
-
-        <button class="add-btn" onclick="openModal()">+</button>
-
-        <div class="bottom-bar">
-            <span class="active">📋 Oggi</span>
-            <span>📊 Statistiche</span>
-            <span>⚙️ Impostazioni</span>
-        </div>
+        <span style="font-size:13px;color:#888;">📶 🔋</span>
     </div>
 
-    <!-- Modal aggiungi promemoria -->
-    <div class="modal-bg" id="modalBg" onclick="closeModal()">
-        <div class="modal" onclick="event.stopPropagation()">
-            <h3>Nuovo promemoria</h3>
-            
-            <label>Titolo</label>
-            <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
-            
-            <label>Categoria</label>
-            <select id="catInput">
-                <option value="lavoro">💼 Lavoro</option>
-                <option value="appuntamenti">📅 Appuntamenti</option>
-                <option value="cose">✅ Cose da fare</option>
-                <option value="pagamenti">💳 Pagamenti</option>
-            </select>
-            
-            <label>Data e ora</label>
-            <input type="datetime-local" id="dateInput">
-            
-            <div class="modal-buttons">
-                <button class="btn-primary" onclick="addReminder()">✅ Salva</button>
-                <button class="btn-secondary" onclick="closeModal()">Chiudi</button>
-            </div>
-            
-            <button class="apple-reminder-btn" onclick="addToAppleReminders()">
-                🍎 Aggiungi anche ai Promemoria Apple
-            </button>
-        </div>
+    <div class="categories">
+        <button class="cat all">Tutti</button>
+        <button class="cat lavoro">💼 Lavoro</button>
+        <button class="cat appuntamenti">📅 Appuntamenti</button>
+        <button class="cat cose">✅ Cose da fare</button>
+        <button class="cat pagamenti">💳 Pagamenti</button>
     </div>
+
+    <div class="content" id="content">
+        <p class="section-title">Oggi</p>
+        <div id="reminders-list"></div>
+    </div>
+
+    <button class="add-btn" onclick="openModal()">+</button>
+
+    <div class="bottom-bar">
+        <span class="active">📋 Oggi</span>
+        <span>📊 Statistiche</span>
+        <span>⚙️ Impostazioni</span>
+    </div>
+</div>
+
+<!-- Modal aggiungi / modifica -->
+<div class="modal-bg" id="modalBg" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h3 id="modalTitle">Nuovo promemoria</h3>
+        <input type="hidden" id="editId">
+        
+        <label>Titolo</label>
+        <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
+        
+        <label>Categoria</label>
+        <select id="catInput">
+            <option value="lavoro">💼 Lavoro</option>
+            <option value="appuntamenti">📅 Appuntamenti</option>
+            <option value="cose">✅ Cose da fare</option>
+            <option value="pagamenti">💳 Pagamenti</option>
+        </select>
+        
+        <label>Data e ora</label>
+        <input type="datetime-local" id="dateInput">
+        
+        <div class="modal-buttons">
+            <button class="btn-primary" id="saveBtn" onclick="saveReminder()">✅ Salva</button>
+            <button class="btn-secondary" onclick="closeModal()">Chiudi</button>
+            <button class="btn-delete" id="deleteBtn" onclick="deleteReminderFromModal()" style="display:none;">🗑 Elimina</button>
+        </div>
+        
+        <button class="apple-reminder-btn" onclick="addToAppleReminders()">
+            🍎 Aggiungi anche ai Promemoria Apple
+        </button>
+    </div>
+</div>
 
 <script>
 let reminders = JSON.parse(localStorage.getItem('memoReminders') || '[]');
@@ -377,104 +186,18 @@ function saveReminders() {
     localStorage.setItem('memoReminders', JSON.stringify(reminders));
 }
 
-function openModal() {
-    document.getElementById('modalBg').classList.add('open');
-    // Imposta data di default a domani mattina
-    const now = new Date();
-    now.setDate(now.getDate() + 1);
-    now.setHours(9, 0, 0, 0);
-    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('dateInput').value = localDateTime;
-    document.getElementById('titleInput').value = '';
-    document.getElementById('titleInput').focus();
-}
-
-function closeModal() {
-    document.getElementById('modalBg').classList.remove('open');
-}
-
-function addReminder() {
-    const title = document.getElementById('titleInput').value.trim();
-    const category = document.getElementById('catInput').value;
-    const dateTime = document.getElementById('dateInput').value;
-    
-    if (!title) { alert('Inserisci un titolo'); return; }
-    if (!dateTime) { alert('Inserisci data e ora'); return; }
-    
-    const reminder = {
-        id: Date.now(),
-        title: title,
-        category: category,
-        dateTime: dateTime,
-        done: false,
-        escalation: 0
-    };
-    
-    reminders.unshift(reminder);
-    saveReminders();
-    renderReminders();
-    closeModal();
-    
-    // Chiedi se aggiungere ai Promemoria Apple
-    if (confirm('Vuoi aggiungerlo anche ai Promemoria Apple per ricevere la notifica?')) {
-        addToAppleRemindersFromData(title, dateTime);
-    }
-}
-
-function addToAppleReminders() {
-    const title = document.getElementById('titleInput').value.trim();
-    const dateTime = document.getElementById('dateInput').value;
-    if (!title || !dateTime) { alert('Compila titolo e data prima'); return; }
-    addToAppleRemindersFromData(title, dateTime);
-}
-
-function addToAppleRemindersFromData(title, dateTime) {
-    // Formatta per il link x-apple-reminder
-    const encodedTitle = encodeURIComponent(title);
-    const url = `x-apple-reminderkit://reminder?title=${encodedTitle}&dueDate=${dateTime}:00`;
-    
-    // Prova ad aprire l'app Promemoria
-    window.location.href = url;
-    
-    // Fallback: mostra istruzioni se l'app non si apre
-    setTimeout(() => {
-        alert('🍎 Apri manualmente Promemoria Apple e aggiungi:\n\n📝 ' + title + '\n📅 ' + new Date(dateTime).toLocaleString('it-IT'));
-    }, 1000);
-}
-
-function toggleDone(id) {
-    const r = reminders.find(r => r.id === id);
-    if (r) {
-        r.done = !r.done;
-        saveReminders();
-        renderReminders();
-    }
-}
-
-function deleteReminder(id) {
-    if (confirm('Eliminare questo promemoria?')) {
-        reminders = reminders.filter(r => r.id !== id);
-        saveReminders();
-        renderReminders();
-    }
-}
-
 function getCategoryName(cat) {
     const map = {
-        'lavoro': '💼 Lavoro',
-        'appuntamenti': '📅 Appuntamenti',
-        'cose': '✅ Cose da fare',
-        'pagamenti': '💳 Pagamenti'
+        'lavoro': '💼 Lavoro', 'appuntamenti': '📅 Appuntamenti',
+        'cose': '✅ Cose da fare', 'pagamenti': '💳 Pagamenti'
     };
     return map[cat] || cat;
 }
 
 function getCategoryColor(cat) {
     const map = {
-        'lavoro': '#1565c0',
-        'appuntamenti': '#c62828',
-        'cose': '#e65100',
-        'pagamenti': '#2e7d32'
+        'lavoro': '#1565c0', 'appuntamenti': '#c62828',
+        'cose': '#e65100', 'pagamenti': '#2e7d32'
     };
     return map[cat] || '#ccc';
 }
@@ -484,99 +207,152 @@ function formatDate(dateTime) {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
     const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     const date = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-    
-    // Oggi, domani o data
     if (d.toDateString() === now.toDateString()) return `⏰ Oggi alle ${time}`;
     if (d.toDateString() === tomorrow.toDateString()) return `⏰ Domani alle ${time}`;
     return `⏰ ${date} alle ${time}`;
 }
 
-function renderReminders() {
-    const list = document.getElementById('reminders-list');
+function openModal(reminder) {
+    document.getElementById('modalBg').classList.add('open');
     
-    if (reminders.length === 0) {
-        list.innerHTML = `
-            <div style="text-align:center;padding:40px 0;color:#aaa;">
-                <div style="font-size:50px;margin-bottom:12px;">📝</div>
-                <div style="font-size:16px;">Nessun promemoria</div>
-                <div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div>
-            </div>`;
-        return;
+    if (reminder) {
+        // Modifica
+        document.getElementById('modalTitle').textContent = 'Modifica promemoria';
+        document.getElementById('editId').value = reminder.id;
+        document.getElementById('titleInput').value = reminder.title;
+        document.getElementById('catInput').value = reminder.category;
+        document.getElementById('dateInput').value = reminder.dateTime;
+        document.getElementById('saveBtn').textContent = '💾 Salva modifiche';
+        document.getElementById('deleteBtn').style.display = 'block';
+    } else {
+        // Nuovo
+        document.getElementById('modalTitle').textContent = 'Nuovo promemoria';
+        document.getElementById('editId').value = '';
+        document.getElementById('titleInput').value = '';
+        document.getElementById('catInput').value = 'lavoro';
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1);
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('dateInput').value = local;
+        document.getElementById('saveBtn').textContent = '✅ Salva';
+        document.getElementById('deleteBtn').style.display = 'none';
+    }
+    document.getElementById('titleInput').focus();
+}
+
+function closeModal() {
+    document.getElementById('modalBg').classList.remove('open');
+}
+
+function saveReminder() {
+    const editId = document.getElementById('editId').value;
+    const title = document.getElementById('titleInput').value.trim();
+    const category = document.getElementById('catInput').value;
+    const dateTime = document.getElementById('dateInput').value;
+    
+    if (!title) { alert('Inserisci un titolo'); return; }
+    if (!dateTime) { alert('Inserisci data e ora'); return; }
+    
+    if (editId) {
+        // Modifica esistente
+        const r = reminders.find(r => r.id == editId);
+        if (r) {
+            r.title = title;
+            r.category = category;
+            r.dateTime = dateTime;
+        }
+    } else {
+        // Nuovo
+        reminders.unshift({
+            id: Date.now(),
+            title: title,
+            category: category,
+            dateTime: dateTime,
+            done: false
+        });
     }
     
-    // Separa per oggi, domani, dopo
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0,0,0,0);
-    
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23,59,59,999);
-    
+    saveReminders();
+    renderReminders();
+    closeModal();
+}
+
+function deleteReminderFromModal() {
+    const editId = document.getElementById('editId').value;
+    if (editId && confirm('Eliminare questo promemoria?')) {
+        reminders = reminders.filter(r => r.id != editId);
+        saveReminders();
+        renderReminders();
+        closeModal();
+    }
+}
+
+function addToAppleReminders() {
+    const title = document.getElementById('titleInput').value.trim();
+    const dateTime = document.getElementById('dateInput').value;
+    if (!title || !dateTime) { alert('Compila titolo e data prima'); return; }
+    const url = `x-apple-reminderkit://reminder?title=${encodeURIComponent(title)}&dueDate=${dateTime}:00`;
+    window.location.href = url;
+}
+
+function toggleDone(id) {
+    const r = reminders.find(r => r.id === id);
+    if (r) { r.done = !r.done; saveReminders(); renderReminders(); }
+}
+
+function editReminder(id) {
+    const r = reminders.find(r => r.id === id);
+    if (r) openModal(r);
+}
+
+function renderReminders() {
+    const list = document.getElementById('reminders-list');
+    if (reminders.length === 0) {
+        list.innerHTML = `<div style="text-align:center;padding:40px 0;color:#aaa;">
+            <div style="font-size:50px;margin-bottom:12px;">📝</div>
+            <div style="font-size:16px;">Nessun promemoria</div>
+            <div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div>`;
+        return;
+    }
     const active = reminders.filter(r => !r.done).sort((a,b) => new Date(a.dateTime) - new Date(b.dateTime));
     const done = reminders.filter(r => r.done);
-    
     let html = '';
-    
     if (active.length > 0) {
         html += '<p class="section-title">📋 Da fare</p>';
         active.forEach(r => {
             html += `
-                <div class="card" style="border-left-color: ${getCategoryColor(r.category)};">
-                    <div class="card-left">
-                        <span class="card-title">${r.title}</span>
-                        <span class="card-time">${formatDate(r.dateTime)}</span>
-                        <span class="card-cat" style="color:${getCategoryColor(r.category)};">${getCategoryName(r.category)}</span>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
-                        <div class="check" onclick="toggleDone(${r.id})"></div>
-                        <span style="font-size:10px;color:#ccc;cursor:pointer;" onclick="deleteReminder(${r.id})">🗑</span>
-                    </div>
-                </div>`;
+            <div class="card" style="border-left-color:${getCategoryColor(r.category)};">
+                <div class="card-left" onclick="editReminder(${r.id})">
+                    <span class="card-title">${r.title}</span>
+                    <span class="card-time">${formatDate(r.dateTime)}</span>
+                    <span class="card-cat" style="color:${getCategoryColor(r.category)};">${getCategoryName(r.category)}</span>
+                </div>
+                <div class="card-actions">
+                    <div class="check" onclick="event.stopPropagation();toggleDone(${r.id})"></div>
+                    <span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(${r.id})">✏️</span>
+                </div>
+            </div>`;
         });
     }
-    
     if (done.length > 0) {
         html += '<p class="section-subtitle">✅ Completati</p>';
         done.forEach(r => {
             html += `
-                <div class="card" style="border-left-color: ${getCategoryColor(r.category)}; opacity: 0.6;">
-                    <div class="card-left">
-                        <span class="card-title" style="text-decoration: line-through;">${r.title}</span>
-                        <span class="card-time">${formatDate(r.dateTime)}</span>
-                    </div>
-                    <div class="check done" onclick="toggleDone(${r.id})"></div>
-                </div>`;
+            <div class="card" style="border-left-color:${getCategoryColor(r.category)};opacity:0.6;">
+                <div class="card-left" onclick="editReminder(${r.id})">
+                    <span class="card-title" style="text-decoration:line-through;">${r.title}</span>
+                    <span class="card-time">${formatDate(r.dateTime)}</span>
+                </div>
+                <div class="check done" onclick="toggleDone(${r.id})"></div>
+            </div>`;
         });
     }
-    
     list.innerHTML = html;
 }
 
-// Controlla promemoria ogni minuto
-setInterval(() => {
-    const now = new Date();
-    reminders.forEach(r => {
-        if (!r.done && r.escalation === 0) {
-            const d = new Date(r.dateTime);
-            if (Math.abs(now - d) < 60000) { // entro 1 minuto
-                // Suona e vibra
-                try { navigator.vibrate([200,100,200,100,200]); } catch(e) {}
-                alert('🔔 ' + r.title + '\n\n' + formatDate(r.dateTime));
-                r.escalation = 1;
-                saveReminders();
-            }
-        }
-    });
-    renderReminders();
-}, 60000);
-
-// Prima esecuzione
 renderReminders();
 </script>
-
 </body>
 </html>

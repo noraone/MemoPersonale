@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
+<html lang="it"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,6 +27,7 @@
         }
         .header h1 { font-size: 30px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; }
         .header .subtitle { font-size: 13px; color: #888; margin-top: 2px; }
+        .tg-status { font-size: 18px; cursor: pointer; }
         .categories { display: flex; gap: 8px; padding: 12px 24px; overflow-x: auto; }
         .cat {
             padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
@@ -51,6 +50,7 @@
         .card-title { font-weight: 600; font-size: 15px; color: #1a1a1a; }
         .card-time { font-size: 13px; color: #888; }
         .card-cat { font-size: 11px; font-weight: 600; }
+        .card-notify { font-size: 10px; color: #e65100; font-weight: 600; margin-top: 2px; }
         .card-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; }
         .check {
             width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ddd;
@@ -70,7 +70,9 @@
             border-top: 1px solid #eee; padding: 12px 24px 24px;
             display: flex; justify-content: space-around; font-size: 12px; color: #888;
         }
+        .bottom-bar span { cursor: pointer; padding: 4px 8px; border-radius: 8px; }
         .bottom-bar .active { color: #1a1a1a; font-weight: 700; }
+        /* MODAL */
         .modal-bg {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             z-index: 100; align-items: flex-end; justify-content: center;
@@ -102,6 +104,31 @@
             padding: 14px 20px; background: #fce4ec; color: #c62828;
             border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-family: inherit;
         }
+        /* SETTINGS */
+        .settings-view { display: none; flex: 1; overflow-y: auto; padding: 16px 24px; }
+        .settings-view.active { display: block; }
+        .settings-section { margin-bottom: 28px; }
+        .settings-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 14px; color: #1a1a1a; }
+        .settings-row { margin-bottom: 12px; }
+        .settings-row label { display: block; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .settings-row input, .settings-row select {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;
+            font-size: 15px; font-family: inherit; outline: none; background: #f8f8f8;
+        }
+        .settings-row input:focus { border-color: #1a1a1a; }
+        .btn-test {
+            width: 100%; padding: 14px; background: #1a1a1a; color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; font-family: inherit; margin-top: 8px;
+        }
+        .btn-test:active { opacity: 0.8; }
+        .status-msg { font-size: 13px; margin-top: 8px; padding: 8px 12px; border-radius: 8px; display: none; }
+        .status-msg.ok { background: #e8f5e9; color: #2e7d32; display: block; }
+        .status-msg.err { background: #fce4ec; color: #c62828; display: block; }
+        .info-box { background: #f8f8f8; border-radius: 12px; padding: 14px; font-size: 13px; color: #555; line-height: 1.6; }
+        .info-box a { color: #1565c0; }
+        .escalation-row { display: flex; align-items: center; gap: 10px; }
+        .escalation-row input[type=number] { width: 70px; padding: 10px; }
     </style>
 </head>
 <body>
@@ -110,33 +137,85 @@
     <div class="header">
         <div>
             <h1>MemoPersonale</h1>
-            <p class="subtitle">La tua app su misura</p>
+            <p class="subtitle" id="headerSubtitle">Notifiche Telegram attive</p>
         </div>
-        <span style="font-size:13px;color:#888;">📶 🔋</span>
+        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">🔔</span>
     </div>
 
-    <div class="categories">
-        <button class="cat all">Tutti</button>
-        <button class="cat lavoro">💼 Lavoro</button>
-        <button class="cat appuntamenti">📅 Appuntamenti</button>
-        <button class="cat cose">✅ Cose da fare</button>
-        <button class="cat pagamenti">💳 Pagamenti</button>
+    <!-- TAB: PROMEMORIA -->
+    <div id="mainView" style="display: none; flex-direction: column; flex: 1 1 0%; overflow: hidden;">
+        <div class="categories">
+            <button class="cat all" onclick="filterCat('all',this)">Tutti</button>
+            <button class="cat lavoro" onclick="filterCat('lavoro',this)">💼 Lavoro</button>
+            <button class="cat appuntamenti" onclick="filterCat('appuntamenti',this)">📅 Appuntamenti</button>
+            <button class="cat cose" onclick="filterCat('cose',this)">✅ Cose da fare</button>
+            <button class="cat pagamenti" onclick="filterCat('pagamenti',this)">💳 Pagamenti</button>
+        </div>
+        <div class="content" id="content">
+            <p class="section-title">Oggi</p>
+            <div id="reminders-list"><div style="text-align:center;padding:40px 0;color:#aaa;"><div style="font-size:50px;margin-bottom:12px;">📝</div><div style="font-size:16px;">Nessun promemoria</div><div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div></div>
+        </div>
+        <button class="add-btn" onclick="openModal()" style="display: none;">+</button>
     </div>
 
-    <div class="content" id="content">
-        <p class="section-title">Oggi</p>
-        <div id="reminders-list"></div>
-    </div>
+    <!-- TAB: IMPOSTAZIONI -->
+    <div class="settings-view active" id="settingsView">
+        <div class="settings-section">
+            <h2>🔔 Notifiche Telegram</h2>
 
-    <button class="add-btn" onclick="openModal()">+</button>
+            <div class="info-box" style="margin-bottom:14px;">
+                Per trovare il tuo <strong>Chat ID</strong>:<br>
+                1. Scrivi un messaggio a <strong>@MemoPersonale1_bot</strong><br>
+                2. Apri questo link:<br>
+                <a href="https://api.telegram.org/bot8505970290:AAF-cMPbU7KwRmCdDVenXmIbR4IqJUue4Us/getUpdates" target="_blank">getUpdates →</a><br>
+                3. Cerca <code>"id":</code> nel risultato e copia il numero
+            </div>
+
+            <div class="settings-row">
+                <label>Token Bot</label>
+                <input type="text" id="tgToken" placeholder="1234567890:AAF-xxx..." autocomplete="off">
+            </div>
+            <div class="settings-row">
+                <label>Chat ID</label>
+                <input type="text" id="tgChatId" placeholder="Es. 123456789" autocomplete="off" inputmode="numeric">
+            </div>
+            <button class="btn-test" onclick="saveTgSettings()">💾 Salva impostazioni</button>
+            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="testTelegram()">📨 Invia messaggio di test</button>
+            <div class="status-msg" id="tgStatusMsg">✅ Impostazioni salvate</div>
+        </div>
+
+        <div class="settings-section">
+            <h2>🔄 Aggiorna software</h2>
+            <div class="settings-row">
+                <label>GitHub Token</label>
+                <input type="password" id="ghToken" placeholder="ghp_..." autocomplete="off">
+            </div>
+            <button class="btn-test" onclick="saveGhToken()">💾 Salva Token</button>
+            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()" disabled="">⏳ Aggiornamento in corso...</button>
+            <div class="status-msg ok" id="ghMsg">✅ Token salvato</div>
+        </div>
+
+        <div class="settings-section">
+            <h2>⏱ Escalation</h2>
+            <div class="settings-row">
+                <label>Secondo messaggio dopo (minuti)</label>
+                <div class="escalation-row">
+                    <input type="number" id="escalationMin" min="5" max="120" value="15">
+                    <span style="font-size:13px;color:#888;">minuti dal primo avviso</span>
+                </div>
+            </div>
+            <button class="btn-test" onclick="saveEscalation()">💾 Salva</button>
+            <div class="status-msg" id="escalationMsg"></div>
+        </div>
+    </div>
 
     <div class="bottom-bar">
-        <span class="active">📋 Oggi</span>
-        <span>📊 Statistiche</span>
-        <span>⚙️ Impostazioni</span>
+        <span class="" id="tabMain" onclick="showMain()">📋 Promemoria</span>
+        <span id="tabSettings" onclick="showSettings()" class="active">⚙️ Impostazioni</span>
     </div>
 </div>
 
+<!-- MODAL PROMEMORIA -->
 <div class="modal-bg" id="modalBg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3 id="modalTitle">Nuovo promemoria</h3>
@@ -161,12 +240,213 @@
 </div>
 
 <script>
+// ── DATI ────────────────────────────────────────────────────────────────────
 let reminders = JSON.parse(localStorage.getItem('memoReminders') || '[]');
+let currentFilter = 'all';
 
 function saveReminders() {
     localStorage.setItem('memoReminders', JSON.stringify(reminders));
 }
 
+// ── IMPOSTAZIONI TELEGRAM ────────────────────────────────────────────────────
+function getTgToken()  { return localStorage.getItem('memo_tg_token') || '8505970290:AAF-cMPbU7KwRmCdDVenXmIbR4IqJUue4Us'; }
+function getTgChatId() { return localStorage.getItem('memo_tg_chatid') || '8684153642'; }
+function getEscalationMin() { return parseInt(localStorage.getItem('memo_escalation_min') || '15', 10); }
+
+function saveTgSettings() {
+    const token  = document.getElementById('tgToken').value.trim();
+    const chatId = document.getElementById('tgChatId').value.trim();
+    if (!token || !chatId) {
+        showMsg('tgStatusMsg', 'err', '⚠️ Inserisci sia Token che Chat ID');
+        return;
+    }
+    localStorage.setItem('memo_tg_token', token);
+    localStorage.setItem('memo_tg_chatid', chatId);
+    showMsg('tgStatusMsg', 'ok', '✅ Impostazioni salvate');
+    updateTgIcon();
+}
+
+function saveEscalation() {
+    const min = parseInt(document.getElementById('escalationMin').value, 10);
+    if (isNaN(min) || min < 1) {
+        showMsg('escalationMsg', 'err', '⚠️ Valore non valido');
+        return;
+    }
+    localStorage.setItem('memo_escalation_min', min);
+    showMsg('escalationMsg', 'ok', '✅ Salvato: escalation dopo ' + min + ' minuti');
+}
+
+function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = 'status-msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'status-msg'; }, 4000);
+}
+
+function saveGhToken() {
+    const token = document.getElementById('ghToken').value.trim();
+    if (!token) { showMsg('ghMsg', 'err', '⚠️ Inserisci il token GitHub'); return; }
+    localStorage.setItem('memo_gh_token', token);
+    showMsg('ghMsg', 'ok', '✅ Token salvato');
+}
+
+async function aggiornaApp() {
+    const ghToken = localStorage.getItem('memo_gh_token') || '';
+    if (!ghToken) { showMsg('ghMsg', 'err', '⚠️ Prima salva il token GitHub'); return; }
+
+    const btn = document.querySelector('button[onclick="aggiornaApp()"]');
+    btn.textContent = '⏳ Aggiornamento in corso...';
+    btn.disabled = true;
+
+    try {
+        // 1. Leggi SHA del file attuale
+        const infoRes = await fetch('https://api.github.com/repos/noraone/MemoPersonale/contents/index.html', {
+            headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (!infoRes.ok) throw new Error('Errore lettura file: ' + infoRes.status);
+        const info = await infoRes.json();
+        const sha = info.sha;
+
+        // 2. Leggi il codice sorgente di questa pagina
+        const content = document.documentElement.outerHTML;
+        const encoded = btoa(unescape(encodeURIComponent(content)));
+
+        // 3. Carica su GitHub
+        const updateRes = await fetch('https://api.github.com/repos/noraone/MemoPersonale/contents/index.html', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'token ' + ghToken,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Update index.html via app',
+                content: encoded,
+                sha: sha
+            })
+        });
+        if (!updateRes.ok) throw new Error('Errore upload: ' + updateRes.status);
+        showMsg('ghMsg', 'ok', '✅ App aggiornata! Attendi 1-2 minuti.');
+    } catch(e) {
+        showMsg('ghMsg', 'err', '❌ ' + e.message);
+    }
+
+    btn.textContent = '🔄 Aggiorna app su GitHub';
+    btn.disabled = false;
+}
+
+function updateTgIcon() {
+    const icon = document.getElementById('tgStatus');
+    const sub  = document.getElementById('headerSubtitle');
+    if (getTgToken() && getTgChatId()) {
+        icon.textContent = '🔔';
+        sub.textContent = 'Notifiche Telegram attive';
+    } else {
+        icon.textContent = '⚙️';
+        sub.textContent = 'La tua app su misura';
+    }
+}
+
+async function sendTelegram(text) {
+    const token  = getTgToken();
+    const chatId = getTgChatId();
+    if (!token || !chatId) return false;
+    try {
+        const res = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'HTML' })
+        });
+        const data = await res.json();
+        return data.ok === true;
+    } catch(e) {
+        return false;
+    }
+}
+
+async function testTelegram() {
+    const btn = document.querySelector('.btn-test[onclick="testTelegram()"]');
+    btn.textContent = '⏳ Invio...';
+    btn.disabled = true;
+    const ok = await sendTelegram('👋 <b>MemoPersonale</b>\nTest notifica: tutto funziona correttamente!');
+    showMsg('tgStatusMsg', ok ? 'ok' : 'err', ok ? '✅ Messaggio inviato! Controlla Telegram.' : '❌ Errore: controlla Token e Chat ID');
+    btn.textContent = '📨 Invia messaggio di test';
+    btn.disabled = false;
+}
+
+// ── CONTROLLO SCADENZE ───────────────────────────────────────────────────────
+function checkDeadlines() {
+    const now = Date.now();
+    const escalMs = getEscalationMin() * 60 * 1000;
+    let changed = false;
+
+    reminders.forEach(r => {
+        if (r.done) return;
+        const dueMs = new Date(r.dateTime).getTime();
+        if (isNaN(dueMs)) return;
+
+        // PRIMO AVVISO: scadenza raggiunta, non ancora notificato
+        if (!r.notified && now >= dueMs) {
+            const catName = getCategoryName(r.category);
+            const timeStr = new Date(r.dateTime).toLocaleString('it-IT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+            const msg = '⏰ <b>Promemoria scaduto!</b>\n\n📌 ' + r.title + '\n🏷 ' + catName + '\n🕐 ' + timeStr;
+            sendTelegram(msg);
+            r.notified = true;
+            r.notifiedAt = now;
+            changed = true;
+        }
+
+        // ESCALATION: notificato, non fatto, passati X minuti
+        if (r.notified && !r.escalated && now >= (r.notifiedAt + escalMs)) {
+            const msg = '🔴 <b>Ancora da fare!</b>\n\n📌 ' + r.title + '\n⚠️ Non hai ancora segnato come completato.\nRicordati di gestirlo!';
+            sendTelegram(msg);
+            r.escalated = true;
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        saveReminders();
+        renderReminders();
+    }
+}
+
+// Avvia il loop ogni 60 secondi
+setInterval(checkDeadlines, 60000);
+// Prima verifica dopo 10 secondi dal caricamento
+setTimeout(checkDeadlines, 10000);
+
+// ── NAV TABS ─────────────────────────────────────────────────────────────────
+function showMain() {
+    document.getElementById('mainView').style.display = 'flex';
+    document.getElementById('settingsView').classList.remove('active');
+    document.getElementById('tabMain').classList.add('active');
+    document.getElementById('tabSettings').classList.remove('active');
+    document.querySelector('.add-btn').style.display = 'flex';
+}
+
+function showSettings() {
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('settingsView').classList.add('active');
+    document.getElementById('tabMain').classList.remove('active');
+    document.getElementById('tabSettings').classList.add('active');
+    document.querySelector('.add-btn').style.display = 'none';
+    // Precompila i campi con i valori salvati
+    document.getElementById('tgToken').value  = getTgToken();
+    document.getElementById('tgChatId').value = getTgChatId();
+    document.getElementById('escalationMin').value = getEscalationMin();
+    document.getElementById('ghToken').value  = localStorage.getItem('memo_gh_token') || '';
+}
+
+// ── FILTRO CATEGORIE ─────────────────────────────────────────────────────────
+function filterCat(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.cat').forEach(b => b.style.opacity = '0.5');
+    btn.style.opacity = '1';
+    renderReminders();
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
 function getCategoryName(cat) {
     const map = { 'lavoro': '💼 Lavoro', 'appuntamenti': '📅 Appuntamenti', 'cose': '✅ Cose da fare', 'pagamenti': '💳 Pagamenti' };
     return map[cat] || cat;
@@ -184,11 +464,12 @@ function formatDate(dateTime) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     const date = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-    if (d.toDateString() === now.toDateString()) return `⏰ Oggi alle ${time}`;
-    if (d.toDateString() === tomorrow.toDateString()) return `⏰ Domani alle ${time}`;
-    return `⏰ ${date} alle ${time}`;
+    if (d.toDateString() === now.toDateString()) return '⏰ Oggi alle ' + time;
+    if (d.toDateString() === tomorrow.toDateString()) return '⏰ Domani alle ' + time;
+    return '⏰ ' + date + ' alle ' + time;
 }
 
+// ── MODAL ────────────────────────────────────────────────────────────────────
 function openModal(reminder) {
     document.getElementById('modalBg').classList.add('open');
     if (reminder) {
@@ -205,13 +486,13 @@ function openModal(reminder) {
         document.getElementById('titleInput').value = '';
         document.getElementById('catInput').value = 'lavoro';
         const now = new Date();
-        now.setMinutes(now.getMinutes() + 1);
+        now.setMinutes(now.getMinutes() + 30);
         const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
         document.getElementById('dateInput').value = local;
         document.getElementById('saveBtn').textContent = '✅ Salva';
         document.getElementById('deleteBtn').style.display = 'none';
     }
-    document.getElementById('titleInput').focus();
+    setTimeout(() => document.getElementById('titleInput').focus(), 100);
 }
 
 function closeModal() {
@@ -219,41 +500,43 @@ function closeModal() {
 }
 
 function saveReminder() {
-    const editId = document.getElementById('editId').value;
-    const title = document.getElementById('titleInput').value.trim();
+    const editId   = document.getElementById('editId').value;
+    const title    = document.getElementById('titleInput').value.trim();
     const category = document.getElementById('catInput').value;
     const dateTime = document.getElementById('dateInput').value;
-    
-    if (!title) { alert('Inserisci un titolo'); return; }
+
+    if (!title)    { alert('Inserisci un titolo'); return; }
     if (!dateTime) { alert('Inserisci data e ora'); return; }
-    
+
     if (editId) {
         const r = reminders.find(r => r.id == editId);
-        if (r) { r.title = title; r.category = category; r.dateTime = dateTime; }
+        if (r) {
+            // Se cambia la data/ora, resetta le notifiche
+            if (r.dateTime !== dateTime) {
+                r.notified = false;
+                r.notifiedAt = null;
+                r.escalated = false;
+            }
+            r.title    = title;
+            r.category = category;
+            r.dateTime = dateTime;
+        }
     } else {
-        reminders.unshift({ id: Date.now(), title: title, category: category, dateTime: dateTime, done: false });
+        reminders.unshift({
+            id: Date.now(),
+            title: title,
+            category: category,
+            dateTime: dateTime,
+            done: false,
+            notified: false,
+            notifiedAt: null,
+            escalated: false
+        });
     }
-    
+
     saveReminders();
     renderReminders();
     closeModal();
-    
-    // Apre Promemoria Apple solo per nuovi memo, compatibile con Chrome e Safari
-    if (!editId) {
-        const d = new Date(dateTime);
-        const iso = d.toISOString().replace(/\.\d{3}/, '');
-        const url = 'x-apple-reminderkit://reminder?title=' + encodeURIComponent(title) + '&dueDate=' + iso;
-        
-        // Usa un iframe nascosto per provare ad aprire l'app
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        setTimeout(() => document.body.removeChild(iframe), 2000);
-        
-        // Fallback: prova anche con window.location
-        setTimeout(() => { window.location.href = url; }, 500);
-    }
 }
 
 function deleteReminderFromModal() {
@@ -268,7 +551,11 @@ function deleteReminderFromModal() {
 
 function toggleDone(id) {
     const r = reminders.find(r => r.id === id);
-    if (r) { r.done = !r.done; saveReminders(); renderReminders(); }
+    if (r) {
+        r.done = !r.done;
+        saveReminders();
+        renderReminders();
+    }
 }
 
 function editReminder(id) {
@@ -276,31 +563,73 @@ function editReminder(id) {
     if (r) openModal(r);
 }
 
+// ── RENDER ───────────────────────────────────────────────────────────────────
 function renderReminders() {
     const list = document.getElementById('reminders-list');
-    if (reminders.length === 0) {
+    let filtered = reminders;
+    if (currentFilter !== 'all') {
+        filtered = reminders.filter(r => r.category === currentFilter);
+    }
+
+    if (filtered.length === 0) {
         list.innerHTML = '<div style="text-align:center;padding:40px 0;color:#aaa;"><div style="font-size:50px;margin-bottom:12px;">📝</div><div style="font-size:16px;">Nessun promemoria</div><div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div>';
         return;
     }
-    const active = reminders.filter(r => !r.done).sort((a,b) => new Date(a.dateTime) - new Date(b.dateTime));
-    const done = reminders.filter(r => r.done);
+
+    const now = Date.now();
+    const active = filtered.filter(r => !r.done).sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+    const done   = filtered.filter(r => r.done);
     let html = '';
+
     if (active.length > 0) {
         html += '<p class="section-title">📋 Da fare</p>';
         active.forEach(r => {
-            html += '<div class="card" style="border-left-color:' + getCategoryColor(r.category) + ';"><div class="card-left" onclick="editReminder(' + r.id + ')"><span class="card-title">' + r.title + '</span><span class="card-time">' + formatDate(r.dateTime) + '</span><span class="card-cat" style="color:' + getCategoryColor(r.category) + ';">' + getCategoryName(r.category) + '</span></div><div class="card-actions"><div class="check" onclick="event.stopPropagation();toggleDone(' + r.id + ')"></div><span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(' + r.id + ')">✏️</span></div></div>';
+            const color = getCategoryColor(r.category);
+            const isOverdue = new Date(r.dateTime).getTime() < now;
+            const notifyBadge = r.escalated
+                ? '<span class="card-notify">🔴 Escalation inviata</span>'
+                : r.notified
+                    ? '<span class="card-notify">📨 Notifica inviata</span>'
+                    : isOverdue ? '<span class="card-notify">⚠️ Scaduto</span>' : '';
+            html += '<div class="card" style="border-left-color:' + color + (isOverdue ? ';background:#fff8f0;' : ';') + '">'
+                + '<div class="card-left" onclick="editReminder(' + r.id + ')">'
+                + '<span class="card-title">' + escHtml(r.title) + '</span>'
+                + '<span class="card-time">' + formatDate(r.dateTime) + '</span>'
+                + '<span class="card-cat" style="color:' + color + ';">' + getCategoryName(r.category) + '</span>'
+                + notifyBadge
+                + '</div>'
+                + '<div class="card-actions">'
+                + '<div class="check" onclick="event.stopPropagation();toggleDone(' + r.id + ')"></div>'
+                + '<span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(' + r.id + ')">✏️</span>'
+                + '</div></div>';
         });
     }
+
     if (done.length > 0) {
         html += '<p class="section-subtitle">✅ Completati</p>';
         done.forEach(r => {
-            html += '<div class="card" style="border-left-color:' + getCategoryColor(r.category) + ';opacity:0.6;"><div class="card-left" onclick="editReminder(' + r.id + ')"><span class="card-title" style="text-decoration:line-through;">' + r.title + '</span><span class="card-time">' + formatDate(r.dateTime) + '</span></div><div class="check done" onclick="toggleDone(' + r.id + ')"></div></div>';
+            const color = getCategoryColor(r.category);
+            html += '<div class="card" style="border-left-color:' + color + ';opacity:0.6;">'
+                + '<div class="card-left" onclick="editReminder(' + r.id + ')">'
+                + '<span class="card-title" style="text-decoration:line-through;">' + escHtml(r.title) + '</span>'
+                + '<span class="card-time">' + formatDate(r.dateTime) + '</span>'
+                + '</div>'
+                + '<div class="check done" onclick="toggleDone(' + r.id + ')"></div>'
+                + '</div>';
         });
     }
+
     list.innerHTML = html;
 }
 
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+updateTgIcon();
 renderReminders();
 </script>
-</body>
-</html>
+
+
+</body></html>

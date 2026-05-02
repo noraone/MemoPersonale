@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
+<html lang="it"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -139,13 +137,13 @@
     <div class="header">
         <div>
             <h1>MemoPersonale</h1>
-            <p class="subtitle" id="headerSubtitle">La tua app su misura</p>
+            <p class="subtitle" id="headerSubtitle">Notifiche Telegram attive</p>
         </div>
-        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">⚙️</span>
+        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">🔔</span>
     </div>
 
     <!-- TAB: PROMEMORIA -->
-    <div id="mainView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="mainView" style="display: none; flex-direction: column; flex: 1 1 0%; overflow: hidden;">
         <div class="categories">
             <button class="cat all" onclick="filterCat('all',this)">Tutti</button>
             <button class="cat lavoro" onclick="filterCat('lavoro',this)">💼 Lavoro</button>
@@ -155,13 +153,13 @@
         </div>
         <div class="content" id="content">
             <p class="section-title">Oggi</p>
-            <div id="reminders-list"></div>
+            <div id="reminders-list"><p class="section-title">📋 Da fare</p><div class="card" style="border-left-color:#1565c0;background:#fff8f0;"><div class="card-left" onclick="editReminder(1777731550924)"><span class="card-title">P</span><span class="card-time">⏰ Oggi alle 16:20</span><span class="card-cat" style="color:#1565c0;">💼 Lavoro</span><span class="card-notify">📨 Notifica inviata</span></div><div class="card-actions"><div class="check" onclick="event.stopPropagation();toggleDone(1777731550924)"></div><span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(1777731550924)">✏️</span></div></div></div>
         </div>
-        <button class="add-btn" onclick="openModal()">+</button>
+        <button class="add-btn" onclick="openModal()" style="display: none;">+</button>
     </div>
 
     <!-- TAB: IMPOSTAZIONI -->
-    <div class="settings-view" id="settingsView">
+    <div class="settings-view active" id="settingsView">
         <div class="settings-section">
             <h2>🔔 Notifiche Telegram</h2>
 
@@ -193,8 +191,8 @@
                 <input type="password" id="ghToken" placeholder="ghp_..." autocomplete="off">
             </div>
             <button class="btn-test" onclick="saveGhToken()">💾 Salva Token</button>
-            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()">🔄 Aggiorna app su GitHub</button>
-            <div class="status-msg" id="ghMsg"></div>
+            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()" disabled="">⏳ Aggiornamento in corso...</button>
+            <div class="status-msg" id="ghMsg">✅ Token salvato</div>
         </div>
 
         <div class="settings-section">
@@ -207,13 +205,13 @@
                 </div>
             </div>
             <button class="btn-test" onclick="saveEscalation()">💾 Salva</button>
-            <div class="status-msg" id="escalationMsg"></div>
+            <div class="status-msg" id="escalationMsg">✅ Salvato: escalation dopo 1 minuti</div>
         </div>
     </div>
 
     <div class="bottom-bar">
-        <span class="active" id="tabMain" onclick="showMain()">📋 Promemoria</span>
-        <span id="tabSettings" onclick="showSettings()">⚙️ Impostazioni</span>
+        <span class="" id="tabMain" onclick="showMain()">📋 Promemoria</span>
+        <span id="tabSettings" onclick="showSettings()" class="active">⚙️ Impostazioni</span>
     </div>
 </div>
 
@@ -221,7 +219,7 @@
 <div class="modal-bg" id="modalBg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3 id="modalTitle">Nuovo promemoria</h3>
-        <input type="hidden" id="editId">
+        <input type="hidden" id="editId" value="">
         <label>Titolo</label>
         <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
         <label>Categoria</label>
@@ -632,5 +630,6 @@ function escHtml(s) {
 updateTgIcon();
 renderReminders();
 </script>
-</body>
-</html>
+
+
+</body></html>

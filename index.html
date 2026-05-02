@@ -406,47 +406,7 @@ async function testTelegram() {
     btn.disabled = false;
 }
 
-// ── CONTROLLO SCADENZE ───────────────────────────────────────────────────────
-function checkDeadlines() {
-    const now = Date.now();
-    const escalMs = getEscalationMin() * 60 * 1000;
-    let changed = false;
-
-    reminders.forEach(r => {
-        if (r.done) return;
-        const dueMs = new Date(r.dateTime).getTime();
-        if (isNaN(dueMs)) return;
-
-        // PRIMO AVVISO: scadenza raggiunta, non ancora notificato
-        if (!r.notified && now >= dueMs) {
-            const catName = getCategoryName(r.category);
-            const timeStr = new Date(r.dateTime).toLocaleString('it-IT', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-            const msg = '⏰ <b>Promemoria scaduto!</b>\n\n📌 ' + r.title + '\n🏷 ' + catName + '\n🕐 ' + timeStr;
-            sendTelegram(msg);
-            r.notified = true;
-            r.notifiedAt = now;
-            changed = true;
-        }
-
-        // ESCALATION: notificato, non fatto, passati X minuti
-        if (r.notified && !r.escalated && now >= (r.notifiedAt + escalMs)) {
-            const msg = '🔴 <b>Ancora da fare!</b>\n\n📌 ' + r.title + '\n⚠️ Non hai ancora segnato come completato.\nRicordati di gestirlo!';
-            sendTelegram(msg);
-            r.escalated = true;
-            changed = true;
-        }
-    });
-
-    if (changed) {
-        saveReminders();
-        renderReminders();
-    }
-}
-
-// Avvia il loop ogni 60 secondi
-setInterval(checkDeadlines, 60000);
-// Prima verifica dopo 10 secondi dal caricamento
-setTimeout(checkDeadlines, 10000);
+// Nota: il controllo scadenze è gestito dal server Render
 
 // ── NAV TABS ─────────────────────────────────────────────────────────────────
 function showMain() {

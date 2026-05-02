@@ -1,4 +1,6 @@
-<html lang="it"><head>
+<!DOCTYPE html>
+<html lang="it">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -137,13 +139,13 @@
     <div class="header">
         <div>
             <h1>MemoPersonale</h1>
-            <p class="subtitle" id="headerSubtitle">Notifiche Telegram attive</p>
+            <p class="subtitle" id="headerSubtitle">La tua app su misura</p>
         </div>
-        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">🔔</span>
+        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">⚙️</span>
     </div>
 
     <!-- TAB: PROMEMORIA -->
-    <div id="mainView" style="display: none; flex-direction: column; flex: 1 1 0%; overflow: hidden;">
+    <div id="mainView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
         <div class="categories">
             <button class="cat all" onclick="filterCat('all',this)">Tutti</button>
             <button class="cat lavoro" onclick="filterCat('lavoro',this)">💼 Lavoro</button>
@@ -153,13 +155,13 @@
         </div>
         <div class="content" id="content">
             <p class="section-title">Oggi</p>
-            <div id="reminders-list"><div style="text-align:center;padding:40px 0;color:#aaa;"><div style="font-size:50px;margin-bottom:12px;">📝</div><div style="font-size:16px;">Nessun promemoria</div><div style="font-size:13px;margin-top:4px;">Tocca + per crearne uno</div></div></div>
+            <div id="reminders-list"></div>
         </div>
-        <button class="add-btn" onclick="openModal()" style="display: none;">+</button>
+        <button class="add-btn" onclick="openModal()">+</button>
     </div>
 
     <!-- TAB: IMPOSTAZIONI -->
-    <div class="settings-view active" id="settingsView">
+    <div class="settings-view" id="settingsView">
         <div class="settings-section">
             <h2>🔔 Notifiche Telegram</h2>
 
@@ -181,7 +183,7 @@
             </div>
             <button class="btn-test" onclick="saveTgSettings()">💾 Salva impostazioni</button>
             <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="testTelegram()">📨 Invia messaggio di test</button>
-            <div class="status-msg" id="tgStatusMsg">✅ Impostazioni salvate</div>
+            <div class="status-msg" id="tgStatusMsg"></div>
         </div>
 
         <div class="settings-section">
@@ -191,8 +193,8 @@
                 <input type="password" id="ghToken" placeholder="ghp_..." autocomplete="off">
             </div>
             <button class="btn-test" onclick="saveGhToken()">💾 Salva Token</button>
-            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()" disabled="">⏳ Aggiornamento in corso...</button>
-            <div class="status-msg ok" id="ghMsg">✅ Token salvato</div>
+            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()">🔄 Aggiorna app su GitHub</button>
+            <div class="status-msg" id="ghMsg"></div>
         </div>
 
         <div class="settings-section">
@@ -210,8 +212,8 @@
     </div>
 
     <div class="bottom-bar">
-        <span class="" id="tabMain" onclick="showMain()">📋 Promemoria</span>
-        <span id="tabSettings" onclick="showSettings()" class="active">⚙️ Impostazioni</span>
+        <span class="active" id="tabMain" onclick="showMain()">📋 Promemoria</span>
+        <span id="tabSettings" onclick="showSettings()">⚙️ Impostazioni</span>
     </div>
 </div>
 
@@ -630,6 +632,5 @@ function escHtml(s) {
 updateTgIcon();
 renderReminders();
 </script>
-
-
-</body></html>
+</body>
+</html>

@@ -76,6 +76,7 @@ function sendPushcut(title, text, reminderId) {
         const body = JSON.stringify({
             title: title,
             text: text,
+            isTimeSensitive: true,
             actions: [
                 { label: '✅ Fatto', url: 'https://memopersonale.onrender.com/done/' + reminderId },
                 { label: '⏰ Posticipa', url: 'https://memopersonale.onrender.com/snooze/' + reminderId }

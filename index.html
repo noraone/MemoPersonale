@@ -1,4 +1,6 @@
-<html lang="it"><head>
+<!DOCTYPE html>
+<html lang="it">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -137,13 +139,13 @@
     <div class="header">
         <div>
             <h1>MemoPersonale</h1>
-            <p class="subtitle" id="headerSubtitle">Notifiche Telegram attive</p>
+            <p class="subtitle" id="headerSubtitle">La tua app su misura</p>
         </div>
-        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">🔔</span>
+        <span class="tg-status" id="tgStatus" onclick="showSettings()" title="Impostazioni Telegram">⚙️</span>
     </div>
 
     <!-- TAB: PROMEMORIA -->
-    <div id="mainView" style="display: none; flex-direction: column; flex: 1 1 0%; overflow: hidden;">
+    <div id="mainView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
         <div class="categories">
             <button class="cat all" onclick="filterCat('all',this)">Tutti</button>
             <button class="cat lavoro" onclick="filterCat('lavoro',this)">💼 Lavoro</button>
@@ -153,13 +155,13 @@
         </div>
         <div class="content" id="content">
             <p class="section-title">Oggi</p>
-            <div id="reminders-list"><p class="section-title">📋 Da fare</p><div class="card" style="border-left-color:#1565c0;background:#fff8f0;"><div class="card-left" onclick="editReminder(1777731550924)"><span class="card-title">P</span><span class="card-time">⏰ Oggi alle 16:20</span><span class="card-cat" style="color:#1565c0;">💼 Lavoro</span><span class="card-notify">📨 Notifica inviata</span></div><div class="card-actions"><div class="check" onclick="event.stopPropagation();toggleDone(1777731550924)"></div><span style="font-size:11px;color:#aaa;cursor:pointer;" onclick="event.stopPropagation();editReminder(1777731550924)">✏️</span></div></div></div>
+            <div id="reminders-list"></div>
         </div>
-        <button class="add-btn" onclick="openModal()" style="display: none;">+</button>
+        <button class="add-btn" onclick="openModal()">+</button>
     </div>
 
     <!-- TAB: IMPOSTAZIONI -->
-    <div class="settings-view active" id="settingsView">
+    <div class="settings-view" id="settingsView">
         <div class="settings-section">
             <h2>🔔 Notifiche Telegram</h2>
 
@@ -181,7 +183,7 @@
             </div>
             <button class="btn-test" onclick="saveTgSettings()">💾 Salva impostazioni</button>
             <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="testTelegram()">📨 Invia messaggio di test</button>
-            <div class="status-msg" id="tgStatusMsg">✅ Messaggio inviato! Controlla Telegram.</div>
+            <div class="status-msg" id="tgStatusMsg"></div>
         </div>
 
         <div class="settings-section">
@@ -191,8 +193,8 @@
                 <input type="password" id="ghToken" placeholder="ghp_..." autocomplete="off">
             </div>
             <button class="btn-test" onclick="saveGhToken()">💾 Salva Token</button>
-            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()" disabled="">⏳ Aggiornamento in corso...</button>
-            <div class="status-msg" id="ghMsg">✅ App aggiornata! Attendi 1-2 minuti.</div>
+            <button class="btn-test" style="background:#1565c0;margin-top:8px;" onclick="aggiornaApp()">🔄 Aggiorna app su GitHub</button>
+            <div class="status-msg" id="ghMsg"></div>
         </div>
 
         <div class="settings-section">
@@ -205,13 +207,13 @@
                 </div>
             </div>
             <button class="btn-test" onclick="saveEscalation()">💾 Salva</button>
-            <div class="status-msg" id="escalationMsg">✅ Salvato: escalation dopo 1 minuti</div>
+            <div class="status-msg" id="escalationMsg"></div>
         </div>
     </div>
 
     <div class="bottom-bar">
-        <span class="" id="tabMain" onclick="showMain()">📋 Promemoria</span>
-        <span id="tabSettings" onclick="showSettings()" class="active">⚙️ Impostazioni</span>
+        <span class="active" id="tabMain" onclick="showMain()">📋 Promemoria</span>
+        <span id="tabSettings" onclick="showSettings()">⚙️ Impostazioni</span>
     </div>
 </div>
 
@@ -219,7 +221,7 @@
 <div class="modal-bg" id="modalBg" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3 id="modalTitle">Nuovo promemoria</h3>
-        <input type="hidden" id="editId" value="">
+        <input type="hidden" id="editId">
         <label>Titolo</label>
         <input type="text" id="titleInput" placeholder="Cosa devi ricordare?">
         <label>Categoria</label>
@@ -241,11 +243,41 @@
 
 <script>
 // ── DATI ────────────────────────────────────────────────────────────────────
+const SERVER_URL = 'https://memopersonale.onrender.com';
 let reminders = JSON.parse(localStorage.getItem('memoReminders') || '[]');
 let currentFilter = 'all';
 
 function saveReminders() {
     localStorage.setItem('memoReminders', JSON.stringify(reminders));
+    syncToServer();
+}
+
+async function syncToServer() {
+    try {
+        await fetch(SERVER_URL + '/reminders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reminders)
+        });
+    } catch(e) {
+        console.warn('Sync server fallita:', e.message);
+    }
+}
+
+async function syncFromServer() {
+    try {
+        const res = await fetch(SERVER_URL + '/reminders');
+        if (!res.ok) return;
+        const serverReminders = await res.json();
+        if (Array.isArray(serverReminders) && serverReminders.length > 0) {
+            // Unisci: il server ha lo stato aggiornato (done, notified, ecc.)
+            reminders = serverReminders;
+            localStorage.setItem('memoReminders', JSON.stringify(reminders));
+            renderReminders();
+        }
+    } catch(e) {
+        console.warn('Sync da server fallita:', e.message);
+    }
 }
 
 // ── IMPOSTAZIONI TELEGRAM ────────────────────────────────────────────────────
@@ -629,7 +661,10 @@ function escHtml(s) {
 // ── INIT ─────────────────────────────────────────────────────────────────────
 updateTgIcon();
 renderReminders();
+// Sincronizza dal server all'avvio (recupera stato aggiornato, es. "fatto" premuto su Telegram)
+setTimeout(syncFromServer, 2000);
+// Risincronizza ogni 30 secondi per aggiornare lo stato
+setInterval(syncFromServer, 30000);
 </script>
-
-
-</body></html>
+</body>
+</html>

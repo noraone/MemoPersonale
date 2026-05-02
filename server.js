@@ -69,6 +69,39 @@ function sendTelegram(text, reminderId) {
     return telegramRequest('sendMessage', params);
 }
 
+const PUSHCUT_URL = 'https://api.pushcut.io/QUX223nQGufbNsp4ZZAmV/notifications/MemoPersonale';
+
+function sendPushcut(title, text, reminderId) {
+    return new Promise((resolve, reject) => {
+        const body = JSON.stringify({
+            title: title,
+            text: text,
+            actions: [
+                { label: '✅ Fatto', url: 'https://memopersonale.onrender.com/done/' + reminderId },
+                { label: '⏰ Posticipa', url: 'https://memopersonale.onrender.com/snooze/' + reminderId }
+            ]
+        });
+        const urlObj = new URL(PUSHCUT_URL);
+        const options = {
+            hostname: urlObj.hostname,
+            path: urlObj.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(body)
+            }
+        };
+        const req = https.request(options, res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve(data));
+        });
+        req.on('error', reject);
+        req.write(body);
+        req.end();
+    });
+}
+
 function getCategoryName(cat) {
     const map = {
         'lavoro': '💼 Lavoro',
@@ -97,11 +130,10 @@ function checkDeadlines() {
                 day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
             });
             const msg = `⏰ <b>Promemoria scaduto!</b>\n\n📌 ${r.title}\n🏷 ${getCategoryName(r.category)}\n🕐 ${timeStr}`;
-            sendTelegram(msg, r.id).then(() => {
+            const titleMsg = '⏰ ' + r.title;
+            sendPushcut(titleMsg, getCategoryName(r.category) + ' - ' + timeStr, r.id).then(() => {
                 console.log(`✅ Notifica inviata: ${r.title}`);
-            }).catch(e => {
-                console.error('Errore Telegram:', e.message);
-            });
+            }).catch(e => console.error('Errore Pushcut:', e.message));
             r.notified = true;
             r.notifiedAt = now;
             changed = true;
@@ -111,11 +143,9 @@ function checkDeadlines() {
         if (r.notified && !r.done && now >= (r.notifiedAt + ESCALATION_MS)) {
             const count = (r.repeatCount || 0) + 1;
             const msg = `🔴 <b>Ancora da fare! (avviso #${count + 1})</b>\n\n📌 ${r.title}\n⚠️ Non hai ancora completato questo promemoria.`;
-            sendTelegram(msg, r.id).then(() => {
+            sendPushcut('🔴 ' + r.title, 'Avviso #' + (count + 1) + ' - ancora da fare!', r.id).then(() => {
                 console.log(`🔴 Escalation #${count} inviata: ${r.title}`);
-            }).catch(e => {
-                console.error('Errore Telegram:', e.message);
-            });
+            }).catch(e => console.error('Errore Pushcut:', e.message));
             r.notifiedAt = now; // resetta il timer per il prossimo avviso
             r.repeatCount = count;
             changed = true;
@@ -243,6 +273,45 @@ const server = http.createServer(async (req, res) => {
         handleTelegramUpdate(body);
         res.writeHead(204);
         res.end('OK');
+        return;
+    }
+
+    // GET /done/:id - segna come fatto (da Pushcut)
+    if (pathname.startsWith('/done/') && req.method === 'GET') {
+        const id = parseInt(pathname.replace('/done/', ''));
+        const reminders = loadReminders();
+        const r = reminders.find(r => r.id === id);
+        if (r) {
+            r.done = true;
+            saveReminders(reminders);
+            console.log(`✅ Completato via Pushcut: ${r.title}`);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end('<h2>✅ Promemoria completato!</h2><p>' + r.title + '</p>');
+        } else {
+            res.writeHead(404);
+            res.end('Non trovato');
+        }
+        return;
+    }
+
+    // GET /snooze/:id - posticipa 15 min (da Pushcut)
+    if (pathname.startsWith('/snooze/') && req.method === 'GET') {
+        const id = parseInt(pathname.replace('/snooze/', ''));
+        const reminders = loadReminders();
+        const r = reminders.find(r => r.id === id);
+        if (r) {
+            const newTime = new Date(Date.now() + 15 * 60 * 1000);
+            r.dateTime = new Date(newTime.getTime() - newTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            r.notified = false;
+            r.notifiedAt = null;
+            saveReminders(reminders);
+            console.log(`⏰ Posticipato via Pushcut: ${r.title}`);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end('<h2>⏰ Posticipato di 15 minuti!</h2><p>' + r.title + '</p>');
+        } else {
+            res.writeHead(404);
+            res.end('Non trovato');
+        }
         return;
     }
 
